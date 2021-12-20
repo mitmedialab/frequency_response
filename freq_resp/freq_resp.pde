@@ -3,6 +3,7 @@ import processing.sound.*;
 FFT fft;
 AudioIn in;
 SoundFile file;
+int cnt = 0;
 
 Sound audio_interface; // allow setting up sampling freq, in/output device...
 int samp_freq = 96000; // TODO: use 96KHz or 192KHz sound card!!
@@ -58,6 +59,15 @@ void draw() {
         line( i, height,
               i, height - smoothed_spectrum * height * zoom_factor );
     }
+
+    // save spectrum in PNG file:
+    if (cnt < 9) {
+        if (cnt > 1)
+            save("spectrum/A" + (cnt-2) + ".png");
+        ++cnt;
+    }
+    else
+        exit();
 
     // Ensure that ou loop is at least the lenght of an FFT window
     // FFT window = 85.3ms (freq_bins = 8192 samples at 96KHz)
