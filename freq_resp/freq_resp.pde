@@ -2,19 +2,18 @@ import processing.sound.*;
 
 FFT fft;
 AudioIn in;
+SoundFile file;
 
 Sound audio_interface; // allow setting up sampling freq, in/output device...
 int samp_freq = 96000; // TODO: use 96KHz or 192KHz sound card!!
 
 int freq_bins = 8192;
-int spectrum_number = 8; // to smooth over multiple measures
-float[][] spectrums = new float[spectrum_number][freq_bins];
+float[] spectrums = new float[freq_bins];
 
-SoundFile file;
-
+int smoothed_freq_bins= 1024; // = screen width!! (see below)
 
 void setup() {
-    size(1024, 512);
+    size(1024, 256); // x = smoothed_freq_bins!! (see above)
 
     audio_interface = new Sound(this);
     audio_interface.sampleRate(samp_freq);
@@ -33,32 +32,37 @@ void setup() {
 }
 
 void draw() {
+    // generate chirp and perform the FFT
     int t0 = millis();
+    file.play();
+    while (file.isPlaying()) delay(1);
+    fft.analyze(spectrums);
 
-    for (int n = 0; n < spectrum_number; n++) {
-        file.play();
-        while (file.isPlaying()) {
-            delay(1);
-        }
-        // freq_bins = 8192 samples at 96KHz => FFT window = 85.3ms
-        fft.analyze(spectrums[n]);
-    }
-    println(millis() - t0);
-
-    // draw frequency response
+    // prepare plot
     background(255);
     stroke(100);
 
-    for(int i = 0; i < freq_bins; i++){
+    int smooth_factor = freq_bins/smoothed_freq_bins;
+    for(int i = 0; i < smoothed_freq_bins; i++){
 
-        // average measures:
-        float spectrum = 0;
-        for (int n = 0; n < spectrum_number; n++)
-            spectrum += spectrums[n][i];
-        spectrum /= spectrum_number;
+        // average measures with their neigbors:
+        float smoothed_spectrum = 0;
+        for (int j = 0; j < smooth_factor; j++) {
+            int index = i * smooth_factor + j;
+            smoothed_spectrum += spectrums[index];
+        }
+        smoothed_spectrum /= smooth_factor;
 
+        // draw smoothed frequency response
         int zoom_factor = 300;
-        line( i, height, i, height - spectrum * height * zoom_factor );
+        line( i, height,
+              i, height - smoothed_spectrum * height * zoom_factor );
     }
+
+    // Ensure that ou loop is at least the lenght of an FFT window
+    // FFT window = 85.3ms (freq_bins = 8192 samples at 96KHz)
+    int fft_window_ms = 1000 * freq_bins / samp_freq;
+    while (millis() - t0 < fft_window_ms) delay(1);
+    println(millis() - t0);
 }
 
