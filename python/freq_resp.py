@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 # Warning: sounddevice can't play very short sounds
 # It also has a relatively long delay after playing a sound
 path = "audio/sweep17-22k_rate96Khz_42ms_padded.wav"
+
+# path = "audio/sweep17-22k_rate96Khz_500ms_padded.wav"
 # path = "audio/8sweep17-22k_rate96Khz_42ms.wav"
 # path = "audio/sweep17-22k_rate96Khz_42ms.wav"
 
@@ -38,7 +40,7 @@ for i in range(len(responses)):
     N = len(response)
     resp_fft = fft(response)*1/N
     resp_fft_real = 2*np.abs(resp_fft[:N//2]) # magnitude of fft freqs
-    resp_fft_filtered = savgol_filter(resp_fft_real, 99, 1) 
+    resp_fft_filtered = savgol_filter(resp_fft_real, 199, 1) 
     resp_freq = fftfreq(N, 1/fs)
     
     # create plot of spectrum
