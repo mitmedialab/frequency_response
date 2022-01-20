@@ -10,11 +10,12 @@ from scipy.signal import savgol_filter
 from scipy.io.wavfile import read, write
 import matplotlib.pyplot as plt
 
-# path = "audio/sweep17-22k_rate96Khz_42ms.wav"
 
 # Warning: sounddevice can't play very short sounds
 # It also has a relatively long delay after playing a sound
-path = "audio/8sweep17-22k_rate96Khz_42ms.wav"
+path = "audio/sweep17-22k_rate96Khz_42ms_padded.wav"
+# path = "audio/8sweep17-22k_rate96Khz_42ms.wav"
+# path = "audio/sweep17-22k_rate96Khz_42ms.wav"
 
 fs, data = read(path)
 
