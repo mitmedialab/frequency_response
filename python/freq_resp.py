@@ -6,6 +6,7 @@ FFT is used to calculate the frequency response of the object.
 import sounddevice as sd
 import numpy as np
 from scipy.fft import fft, fftfreq
+from scipy.signal import savgol_filter
 from scipy.io.wavfile import read, write
 import matplotlib.pyplot as plt
 
@@ -35,11 +36,13 @@ for i in range(len(responses)):
     response = np.mean(response, axis=1) # convert stereo to mono
     N = len(response)
     resp_fft = fft(response)*1/N
+    resp_fft_real = 2*np.abs(resp_fft[:N//2]) # magnitude of fft freqs
+    resp_fft_filtered = savgol_filter(resp_fft_real, 99, 1) 
     resp_freq = fftfreq(N, 1/fs)
     
     # create plot of spectrum
     plt.figure()
-    plt.plot(resp_freq[:N//2], 2*np.abs(resp_fft[:N//2]))
+    plt.plot(resp_freq[:N//2], resp_fft_filtered)
     plt.grid()
     plt.xlabel("Frequency")
     plt.ylabel("Magnitude")
@@ -47,6 +50,6 @@ for i in range(len(responses)):
     plt.close()
 
 
-# TODO: print out graphs of the frequency response instead of raw response audio
+# also save audio response snippets
 for i in range(len(responses)):
     write("data/response{0}.wav".format(i), fs, responses[i])
